@@ -270,9 +270,10 @@ class PlayState extends MusicBeatState
 		// healthBar
 		add(healthBar);
 
-		scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 200, healthBarBG.y + healthBarBG.height - 5, 0, "Score: 0", 16);
+		scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 170, healthBarBG.y + healthBarBG.height + 5, 0, "Score: 0", 16);
 		scoreTxt.setFormat("assets/fonts/vcr.ttf", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.NONE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
+		scoreTxt.cameras = [camHUD];
 		add(scoreTxt);
 
 		var dadGraphicThing:FlxGraphic = FlxG.bitmap.add('assets/images/icons/icon-${dad.curCharacter}.png', false, 'assets/images/icons/icon-${dad.curCharacter}.png');
