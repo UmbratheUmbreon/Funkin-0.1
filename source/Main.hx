@@ -31,5 +31,6 @@ class Main extends Sprite
 			cpp.vm.Gc.run(false);
 			#end
 		});
+		FlxG.mouse.visible = false;
 	}
 }

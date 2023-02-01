@@ -1,5 +1,6 @@
 package;
 
+import flixel.tweens.FlxTween;
 import flixel.graphics.FlxGraphic;
 import flash.text.TextField;
 import flixel.FlxG;
@@ -16,6 +17,7 @@ class FreeplayState extends MusicBeatState
 {
 	var songs:Array<String> = ["Tutorial", "Bopeebo", "Fresh", "Dadbattle"];
 	var iconRefs:Array<String> = ['gf', 'dad', 'dad', 'dad'];
+	var colours:Array<Array<Int>> = [[165, 0, 77], [146, 113, 253], [146, 113, 253], [146, 113, 253]];
 
 	var selector:FlxText;
 	var curSelected:Int = 0;
@@ -25,6 +27,7 @@ class FreeplayState extends MusicBeatState
 	var diffText:FlxText;
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
+	var bg:FlxSprite;
 
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 
@@ -36,27 +39,33 @@ class FreeplayState extends MusicBeatState
 				FlxG.sound.playMusic('assets/music/freakyMenu' + TitleState.soundExt);
 		}
 
-		var isDebug:Bool = false;
+		var isDebug:Bool = #if debug true #else false #end;
 
-		#if debug
-		isDebug = true;
-		#end
-
-		if (StoryMenuState.weekUnlocked[1] || isDebug)
-		{
-			songs.push('Spookeez');
-			iconRefs.push('spooky');
-			songs.push('South');
-			iconRefs.push('spooky');
-			songs.push('Monster');
-			iconRefs.push('monster');
+		for (i=>bool in StoryMenuState.weekUnlocked) {
+			if (bool || isDebug) {
+				switch (i) {
+					case 1:
+						songs.push('Spookeez');
+						iconRefs.push('spooky');
+						colours.push([34, 51, 68]);
+						
+						songs.push('South');
+						iconRefs.push('spooky');
+						colours.push([34, 51, 68]);
+			
+						songs.push('Monster');
+						iconRefs.push('monster');
+						colours.push([34, 51, 68]);
+				}
+			}
 		}
 
 		// LOAD MUSIC
 
 		// LOAD CHARACTERS
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(AssetPaths.menuBGBlue__png);
+		bg = new FlxSprite().loadGraphic(AssetPaths.menuDesat__png);
+		bg.screenCenter();
 		add(bg);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
@@ -201,6 +210,10 @@ class FreeplayState extends MusicBeatState
 
 		intendedScore = Highscore.getScore(songs[curSelected], curDifficulty);
 		// lerpScore = 0;
+
+		var newColor:FlxColor = FlxColor.fromRGB(colours[curSelected][0], colours[curSelected][1], colours[curSelected][2]);
+		if (bg.color != newColor)
+			FlxTween.color(bg, 0.5, bg.color, newColor);
 
 		var bullShit:Int = 0;
 

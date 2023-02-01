@@ -26,6 +26,7 @@ class Note extends FlxSprite
 	public static var BLUE_NOTE:Int = 1;
 	public static var RED_NOTE:Int = 3;
 	public var offsetY:Float = 0;
+	public var type:String = '';
 
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false)
 	{
@@ -103,7 +104,7 @@ class Note extends FlxSprite
 			updateHitbox();
 
 			x -= width / 2;
-			offsetY = (-height/2) - 7; //kms
+			offsetY = (-height/2) + PlayState.SONG.speed; //kms //fml
 
 			if (prevNote.isSustainNote)
 			{

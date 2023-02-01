@@ -9,13 +9,12 @@ using StringTools;
 class Boyfriend extends Character
 {
 	public var stunned:Bool = false;
-	public var holdTimer:Float = 0;
 
 	public function new(x:Float, y:Float)
 	{
 		super(x, y);
 
-		var tex = FlxAtlasFrames.fromSparrow(AssetPaths.BOYFRIEND__png, AssetPaths.BOYFRIEND__xml);
+		var tex = FlxAtlasFrames.fromSparrow('assets/images/characters/BOYFRIEND.png', 'assets/images/characters/BOYFRIEND.xml');
 		frames = tex;
 		animation.addByPrefix('idle', 'BF idle dance', 24, false);
 		animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -52,17 +51,19 @@ class Boyfriend extends Character
 		addOffset('deathConfirm', 37, 69);
 		addOffset('scared', -4);
 		healthColor = 0xFF31B0D1;
+		iconOffsets = [0, -5];
 	}
 
 	override function update(elapsed:Float)
 	{
-		if (holdTimer > 0) holdTimer -= elapsed;
-		if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !stunned)
-		{
-			playAnim('idle', true, false, 10);
-		}
-		if (animation.curAnim.name.startsWith('sing') && holdTimer <= 0 && !stunned) {
-			playAnim('idle', true);
+		if (heyTimer <= 0) {
+			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !stunned)
+			{
+				playAnim('idle', true, false, 10);
+			}
+			if (animation.curAnim.name.startsWith('sing') && singTimer <= 0 && !stunned) {
+				playAnim('idle', true);
+			}
 		}
 
 		if (animation.curAnim.name == 'firstDeath' && animation.curAnim.finished)

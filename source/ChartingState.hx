@@ -76,8 +76,14 @@ class ChartingState extends MusicBeatState
 
 	var vocals:FlxSound;
 
+	override function destroy() {
+		FlxG.mouse.visible = false;
+		super.destroy();
+	}
+
 	override function create()
 	{
+		FlxG.mouse.visible = true;
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 8, GRID_SIZE * 16);
 		add(gridBG);
 
@@ -505,7 +511,12 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.justPressed.LEFT)
 			changeSection(curSection - 1);
 
-		bpmTxt.text = "BPM: " + Conductor.bpm + "\nSection: " + curSection;
+		bpmTxt.text = 
+		'Pos: ' + Conductor.songPosition/1000 +
+		"\nBPM: " + Conductor.bpm + 
+		"\nSection: " + curSection + 
+		'\nBeat: ' + curBeat + 
+		'\nStep: ' + curStep;
 		super.update(elapsed);
 	}
 
@@ -516,8 +527,6 @@ class ChartingState extends MusicBeatState
 		if (_song.notes[sec] != null)
 		{
 			curSection = sec;
-
-			updateGrid();
 
 			if (updateMusic)
 			{
