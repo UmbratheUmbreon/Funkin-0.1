@@ -81,6 +81,7 @@ class PlayState extends MusicBeatState
 	override function destroy() {
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+		camFollowPoint.put();
 		super.destroy();
 	}
 
@@ -179,7 +180,7 @@ class PlayState extends MusicBeatState
 		add(dad);
 		dad.dance();
 
-		var camPos:FlxPoint = new FlxPoint(gf.getGraphicMidpoint().x + 100, gf.getGraphicMidpoint().y + 100);
+		var camPos:FlxPoint = FlxPoint.get(gf.getGraphicMidpoint().x + 100, gf.getGraphicMidpoint().y + 100);
 
 		switch (SONG.player2)
 		{
@@ -236,6 +237,7 @@ class PlayState extends MusicBeatState
 		add(camFollow);
 		FlxG.camera.focusOn(FlxPoint.get(camPos.x, camPos.y));
 		FlxG.camera.follow(camFollow, LOCKON, 0.04);
+		camPos.put();
 
 		// FlxG.camera.setScrollBounds(0, FlxG.width, 0, FlxG.height);
 		FlxG.camera.zoom = defaultCamZoom;
@@ -1214,7 +1216,7 @@ class PlayState extends MusicBeatState
 			else
 				Conductor.changeBPM(SONG.bpm);
 		}
-		if (dad.singTimer <= 0 && dad.heyTimer <= 0)
+		if (dad.singTimer <= 0 && dad.heyTimer <= 0 && curBeat % dad.danceBeats == 0)
 			dad.dance();
 
 		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0)
@@ -1233,7 +1235,7 @@ class PlayState extends MusicBeatState
 			gf.dance();
 		}
 
-		if (!boyfriend.animation.curAnim.name.startsWith("sing") && boyfriend.heyTimer <= 0 && boyfriend.singTimer <= 0)
+		if (!boyfriend.animation.curAnim.name.startsWith("sing") && boyfriend.heyTimer <= 0 && boyfriend.singTimer <= 0 && curBeat % boyfriend.danceBeats == 0)
 			boyfriend.playAnim('idle');
 
 		if (isHalloween && FlxG.random.bool(10) && curBeat > lightningStrikeBeat + lightningOffset)

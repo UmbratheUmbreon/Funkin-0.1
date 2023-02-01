@@ -16,6 +16,7 @@ class Character extends FlxSprite
 	public var healthColor:FlxColor = 0xFFFF0000;
 	public var iconOffsets:Array<Float> = [0, 0];
 	public var iconAntialiasing:Bool = true;
+	public var danceBeats:Int = 2;
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
@@ -59,6 +60,7 @@ class Character extends FlxSprite
 
 				playAnim('danceRight');
 				healthColor = 0xFFA5004D;
+				danceBeats = 1;
 
 			case 'dad':
 				// DAD ANIMATION LOADING CODE
@@ -99,6 +101,7 @@ class Character extends FlxSprite
 				playAnim('danceRight');
 				healthColor = 0xFFD57E00;
 				iconOffsets = [10, -15];
+				danceBeats = 1;
 
 			case 'monster':
 				tex = FlxAtlasFrames.fromSparrow('assets/images/characters/Monster_Assets.png', 'assets/images/characters/Monster_Assets.xml');
