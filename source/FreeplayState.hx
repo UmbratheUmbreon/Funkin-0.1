@@ -2,16 +2,12 @@ package;
 
 import flixel.tweens.FlxTween;
 import flixel.graphics.FlxGraphic;
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import htmlparser.HtmlDocument;
-import lime.utils.Assets;
 
 class FreeplayState extends MusicBeatState
 {
@@ -64,7 +60,7 @@ class FreeplayState extends MusicBeatState
 
 		// LOAD CHARACTERS
 
-		bg = new FlxSprite().loadGraphic(AssetPaths.menuDesat__png);
+		bg = new FlxSprite().loadGraphic('assets/images/menuDesat.png');
 		bg.screenCenter();
 		add(bg);
 
@@ -101,33 +97,6 @@ class FreeplayState extends MusicBeatState
 
 		changeSelection();
 		changeDiff();
-
-		// FlxG.sound.playMusic('assets/music/title' + TitleState.soundExt, 0);
-		// FlxG.sound.music.fadeIn(2, 0, 0.8);
-		selector = new FlxText();
-
-		selector.size = 40;
-		selector.text = ">";
-		// add(selector);
-
-		var swag:Alphabet = new Alphabet(1, 0, "swag");
-
-		// JUST DOIN THIS SHIT FOR TESTING!!!
-		/* 
-			var md:String = Markdown.markdownToHtml(Assets.getText('CHANGELOG.md'));
-
-			var texFel:TextField = new TextField();
-			texFel.width = FlxG.width;
-			texFel.height = FlxG.height;
-			// texFel.
-			texFel.htmlText = md;
-
-			FlxG.stage.addChild(texFel);
-
-			// scoreText.textField.htmlText = md;
-
-			trace(md);
-		 */
 
 		super.create();
 	}
@@ -168,7 +137,7 @@ class FreeplayState extends MusicBeatState
 
 			PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].toLowerCase());
 			PlayState.isStoryMode = false;
-			FlxG.switchState(new PlayState());
+			FlxG.switchState((FlxG.keys.pressed.SHIFT ? new ChartingState() : new PlayState()));
 			if (FlxG.sound.music != null)
 				FlxG.sound.music.stop();
 		}

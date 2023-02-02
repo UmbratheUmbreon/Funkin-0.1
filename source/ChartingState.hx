@@ -292,10 +292,13 @@ class ChartingState extends MusicBeatState
 			// vocals.stop();
 		}
 
-		FlxG.sound.playMusic('assets/music/' + daSong + "_Inst" + TitleState.soundExt, 0.6);
+		FlxG.sound.playMusic('assets/songs/${daSong.toLowerCase()}/Inst${TitleState.soundExt}', 0.6);
 
-		// WONT WORK FOR TUTORIAL! REDO LATER
-		vocals = new FlxSound().loadEmbedded("assets/music/" + daSong + "_Voices" + TitleState.soundExt);
+		if (_song.needsVoices && (openfl.Assets.exists('assets/songs/${daSong.toLowerCase()}/Voices${TitleState.soundExt}', MUSIC)
+			#if sys || sys.FileSystem.exists('assets/songs/${daSong.toLowerCase()}/Voices${TitleState.soundExt}') #end))
+			vocals = new FlxSound().loadEmbedded('assets/songs/${daSong.toLowerCase()}/Voices${TitleState.soundExt}');
+		else
+			vocals = new FlxSound();
 		FlxG.sound.list.add(vocals);
 
 		FlxG.sound.music.pause();
@@ -391,9 +394,9 @@ class ChartingState extends MusicBeatState
 		{
 			if (curStep > (_song.notes[curSection].lengthInSteps) * (curSection + 1))
 			{
-				trace(curStep);
+				/*trace(curStep);
 				trace((_song.notes[curSection].lengthInSteps) * (curSection + 1));
-				trace('DUMBSHIT');
+				trace('DUMBSHIT');*/
 
 				if (_song.notes[curSection + 1] == null)
 				{

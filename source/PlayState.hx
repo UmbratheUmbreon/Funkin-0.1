@@ -129,7 +129,7 @@ class PlayState extends MusicBeatState
 
 		switch (SONG.song.toLowerCase()) {
 			case 'spookeez' | 'south' | 'monster':
-				var hallowTex = FlxAtlasFrames.fromSparrow(AssetPaths.halloween_bg__png, AssetPaths.halloween_bg__xml);
+				var hallowTex = FlxAtlasFrames.fromSparrow('assets/images/halloween_bg.png', 'assets/images/halloween_bg.xml');
 
 				halloweenBG = new FlxSprite(-200, -100);
 				halloweenBG.frames = hallowTex;
@@ -143,7 +143,7 @@ class PlayState extends MusicBeatState
 	
 				defaultCamZoom = 1.05;
 			default:
-				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(AssetPaths.stageback__png);
+				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic('assets/images/stageback.png');
 				// bg.setGraphicSize(Std.int(bg.width * 2.5));
 				// bg.updateHitbox();
 				bg.antialiasing = true;
@@ -151,7 +151,7 @@ class PlayState extends MusicBeatState
 				bg.active = false;
 				add(bg);
 	
-				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(AssetPaths.stagefront__png);
+				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic('assets/images/stagefront.png');
 				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 				stageFront.updateHitbox();
 				stageFront.antialiasing = true;
@@ -159,7 +159,7 @@ class PlayState extends MusicBeatState
 				stageFront.active = false;
 				add(stageFront);
 	
-				var stageCurtains:FlxSprite = new FlxSprite(-500, -300).loadGraphic(AssetPaths.stagecurtains__png);
+				var stageCurtains:FlxSprite = new FlxSprite(-500, -300).loadGraphic('assets/images/stagecurtains.png');
 				stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
 				stageCurtains.updateHitbox();
 				stageCurtains.antialiasing = true;
@@ -246,7 +246,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.fixedTimestep = false;
 
-		healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic(AssetPaths.healthBar__png);
+		healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic('assets/images/healthBar.png');
 		healthBarBG.screenCenter(X);
 		healthBarBG.scrollFactor.set();
 		add(healthBarBG);
@@ -389,7 +389,7 @@ class PlayState extends MusicBeatState
 		lastReportedPlayheadPosition = 0;
 
 		startingSong = false;
-		FlxG.sound.playMusic("assets/music/" + SONG.song + "_Inst" + TitleState.soundExt, 1, false);
+		FlxG.sound.playMusic('assets/songs/${SONG.song.toLowerCase()}/Inst${TitleState.soundExt}', 1, false);
 		FlxG.sound.music.onComplete = endSong;
 		vocals.play();
 	}
@@ -405,8 +405,10 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
-		if (SONG.needsVoices)
-			vocals = new FlxSound().loadEmbedded("assets/music/" + curSong + "_Voices" + TitleState.soundExt);
+		//im so sorry for this if statement
+		if (SONG.needsVoices && (openfl.Assets.exists('assets/songs/${SONG.song.toLowerCase()}/Voices${TitleState.soundExt}', MUSIC)
+			#if sys || sys.FileSystem.exists('assets/songs/${SONG.song.toLowerCase()}/Voices${TitleState.soundExt}') #end))
+			vocals = new FlxSound().loadEmbedded('assets/songs/${SONG.song.toLowerCase()}/Voices${TitleState.soundExt}');
 		else
 			vocals = new FlxSound();
 
@@ -495,7 +497,7 @@ class PlayState extends MusicBeatState
 		for (i in 0...4)
 		{
 			var babyArrow:FlxSprite = new FlxSprite(0, strumLine.y);
-			var arrTex = FlxAtlasFrames.fromSparrow(AssetPaths.NOTE_assets__png, AssetPaths.NOTE_assets__xml);
+			var arrTex = FlxAtlasFrames.fromSparrow('assets/images/NOTE_assets.png', 'assets/images/NOTE_assets.xml');
 			babyArrow.frames = arrTex;
 			babyArrow.animation.addByPrefix('green', 'arrowUP');
 			babyArrow.animation.addByPrefix('blue', 'arrowDOWN');
@@ -707,38 +709,8 @@ class PlayState extends MusicBeatState
 					daNote.active = true;
 				}
 
-				if (!daNote.mustPress && daNote.wasGoodHit)
-				{
-					if (SONG.song != 'Tutorial')
-						camZooming = true;
-
-					if (!dad.animation.curAnim.name.startsWith('sing')) dad.singTimer += 0.15;
-					switch (Math.abs(daNote.noteData))
-					{
-						case 2:
-							dad.playAnim('singUP', true);
-						case 3:
-							dad.playAnim('singRIGHT', true);
-						case 1:
-							dad.playAnim('singDOWN', true);
-						case 0:
-							dad.playAnim('singLEFT', true);
-					}
-					dad.singTimer += elapsed*9; //9 frames
-					dadStrums.forEach(function(spr:FlxSprite)
-					{
-						if(spr.ID == Math.abs(daNote.noteData)) spr.animation.play('confirm');
-				
-						resetStrumOffsets(spr);
-					});
-
-					if (SONG.needsVoices)
-						vocals.volume = 1;
-
-					daNote.kill();
-					notes.remove(daNote, true);
-					daNote.destroy();
-				}
+				if (!daNote.mustPress && daNote.canBeHit)
+					dadNoteHit(daNote);
 
 				daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * PlayState.SONG.speed));
 				daNote.y += daNote.offsetY;
@@ -1115,12 +1087,12 @@ class PlayState extends MusicBeatState
 					gf.playAnim('cheer', true);
 					gf.heyTimer = boyfriend.heyTimer = 0.3;
 					noAnim = true;
-				case 'no animations':
+				case 'no animation':
 					noAnim = true;
 				case 'hurt':
 					healthAmount = -healthAmount;
-					boyfriend.playAnim('hurt', true);
-					boyfriend.singTimer += 0.15;
+					//boyfriend.playAnim('hurt', true);
+					//boyfriend.singTimer += 0.15;
 					noAnim = true;
 			}
 
@@ -1148,6 +1120,41 @@ class PlayState extends MusicBeatState
 			note.destroy();
 		}
 		scoreTxt.text = 'Score: $songScore';
+	}
+
+	function dadNoteHit(daNote:Note) {
+		if (SONG.song != 'Tutorial')
+			camZooming = true;
+
+		var noAnim = false;
+		switch (daNote.type) {
+			case 'hey':
+				dad.playAnim('hey', true);
+				dad.heyTimer = 0.3;
+				noAnim = true;
+			case 'no animation':
+				noAnim = true;
+		}
+
+		if (!noAnim) {
+			final sings = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+			dad.playAnim('sing${sings[daNote.noteData]}', true);
+			dad.singTimer += 0.15;
+			if (dad.singTimer > FlxG.elapsed*10) dad.singTimer = FlxG.elapsed*10;
+		}
+		dadStrums.forEach(function(spr:FlxSprite)
+		{
+			if(spr.ID == Math.abs(daNote.noteData)) spr.animation.play('confirm');
+				
+			resetStrumOffsets(spr);
+		});
+
+		if (SONG.needsVoices)
+			vocals.volume = 1;
+
+		daNote.kill();
+		notes.remove(daNote, true);
+		daNote.destroy();
 	}
 
 	function lightningStrikeShit():Void
@@ -1178,12 +1185,6 @@ class PlayState extends MusicBeatState
 		super.stepHit();
 
 		switch (curSong) {
-			case 'Spookeez':
-				switch (curStep) {
-					case 189 | 445:
-						//bruh why does this not work
-						notes.members[0].type = 'hey';
-				}
 			case 'Tutorial':
 				switch (curStep) {
 					case 124 | 188:
