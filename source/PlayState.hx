@@ -175,35 +175,30 @@ class PlayState extends MusicBeatState
 		gf.scrollFactor.set(0.95, 0.95);
 		add(gf);
 		gf.dance();
+		gf.animation.finish();
 
 		dad = new Character(100, 100, SONG.player2);
 		add(dad);
 		dad.dance();
-
-		var camPos:FlxPoint = FlxPoint.get(gf.getGraphicMidpoint().x + 100, gf.getGraphicMidpoint().y + 100);
+		dad.animation.finish();
 
 		switch (SONG.player2)
 		{
 			case 'gf':
 				dad.setPosition(gf.x, gf.y);
 				gf.visible = false;
-				if (isStoryMode)
-				{
-					//camPos.x += 600;
-					tweenCamIn();
-				}
-
 			case "spooky":
 				dad.y += 200;
 			case "monster":
 				dad.y += 100;
-			/*case 'dad':
-				camPos.x += 400;*/
 		}
 
 		boyfriend = new Boyfriend(770, 450);
 		add(boyfriend);
 		boyfriend.playAnim('idle');
+		boyfriend.animation.finish();
+
+		var camPos:FlxPoint = FlxPoint.get((boyfriend.getCorrectMidpoint().x - 100) + boyfriend.cameraOffsets[0], (boyfriend.getCorrectMidpoint().y - 100) + boyfriend.cameraOffsets[1]);
 
 		/*var doof:DialogueBox = new DialogueBox(false, dialogue);
 		// doof.x += 70;
@@ -324,9 +319,12 @@ class PlayState extends MusicBeatState
 
 		startTimer = new FlxTimer().start(Conductor.crochet / 1000, function(tmr:FlxTimer)
 		{
-			dad.dance();
-			gf.dance();
-			boyfriend.playAnim('idle');
+			if (swagCounter % dad.danceBeats == 0)
+				dad.dance();
+			if (swagCounter % gf.danceBeats == 0)
+				gf.dance();
+			if (swagCounter % boyfriend.danceBeats == 0)
+				boyfriend.playAnim('idle');
 
 			switch (swagCounter)
 			{
@@ -335,9 +333,12 @@ class PlayState extends MusicBeatState
 				case 1:
 					var ready:FlxSprite = new FlxSprite().loadGraphic('assets/images/ready.png');
 					ready.scrollFactor.set();
+					ready.cameras = [camHUD];
+					ready.velocity.y = -150;
+					ready.acceleration.y = 500;
 					ready.screenCenter();
 					add(ready);
-					FlxTween.tween(ready, {y: ready.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+					FlxTween.tween(ready, {alpha: 0}, (Conductor.crochet / 1000)*3, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween)
 						{
@@ -348,9 +349,12 @@ class PlayState extends MusicBeatState
 				case 2:
 					var set:FlxSprite = new FlxSprite().loadGraphic('assets/images/set.png');
 					set.scrollFactor.set();
+					set.cameras = [camHUD];
+					set.velocity.y = -150;
+					set.acceleration.y = 500;
 					set.screenCenter();
 					add(set);
-					FlxTween.tween(set, {y: set.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+					FlxTween.tween(set, {alpha: 0}, (Conductor.crochet / 1000)*2.5, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween)
 						{
@@ -361,9 +365,12 @@ class PlayState extends MusicBeatState
 				case 3:
 					var go:FlxSprite = new FlxSprite().loadGraphic('assets/images/go.png');
 					go.scrollFactor.set();
+					go.cameras = [camHUD];
+					go.velocity.y = -150;
+					go.acceleration.y = 500;
 					go.screenCenter();
 					add(go);
-					FlxTween.tween(go, {y: go.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+					FlxTween.tween(go, {alpha: 0}, (Conductor.crochet / 1000)*2, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween)
 						{
@@ -644,28 +651,25 @@ class PlayState extends MusicBeatState
 			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
 
-		if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null)
-		{
-			if (camFollowPoint.x != dad.getMidpoint().x + 150 && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
-			{
-				camFollowPoint.x = dad.getMidpoint().x + 150;
-				camFollowPoint.y = dad.getMidpoint().y - 100;
-				vocals.volume = 1;
-
-				if (SONG.song.toLowerCase() == 'tutorial')
+		if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null) {
+			if (!PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection) {
+				if (camFollowPoint.x != (dad.getCorrectMidpoint().x + 150) + dad.cameraOffsets[0])
 				{
-					tweenCamIn();
+					camFollowPoint.x = (dad.getCorrectMidpoint().x + 150) + dad.cameraOffsets[0];
+					camFollowPoint.y = (dad.getCorrectMidpoint().y - 100) + dad.cameraOffsets[1];
+					vocals.volume = 1;
+			
+					if (SONG.song.toLowerCase() == 'tutorial')
+						tweenCamIn();
 				}
-			}
-
-			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && camFollowPoint.x != boyfriend.getMidpoint().x - 100)
-			{
-				camFollowPoint.x = boyfriend.getMidpoint().x - 100;
-				camFollowPoint.y = boyfriend.getMidpoint().y - 100;
-
-				if (SONG.song.toLowerCase() == 'tutorial')
+			} else {
+				if (camFollowPoint.x != (boyfriend.getCorrectMidpoint().x - 100) + boyfriend.cameraOffsets[0])
 				{
-					FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
+					camFollowPoint.x = (boyfriend.getCorrectMidpoint().x - 100) + boyfriend.cameraOffsets[0];
+					camFollowPoint.y = (boyfriend.getCorrectMidpoint().y - 100) + boyfriend.cameraOffsets[1];
+			
+					if (SONG.song.toLowerCase() == 'tutorial')
+						FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
 				}
 			}
 		}
@@ -757,7 +761,7 @@ class PlayState extends MusicBeatState
 		var sings = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 		dadStrums.forEach(function(spr:FlxSprite)
 		{
-			if (!dad.animation.curAnim.name.startsWith('sing${sings[spr.ID]}'))
+			if (!dad.getCurAnimName().startsWith('sing${sings[spr.ID]}'))
 				spr.animation.play('static');
 
 			resetStrumOffsets(spr);
@@ -770,7 +774,7 @@ class PlayState extends MusicBeatState
 
 		#if debug
 		if (FlxG.keys.justPressed.EIGHT)
-			FlxG.switchState(new AnimationDebug(SONG.player1));
+			FlxG.switchState(new AnimationDebug(FlxG.keys.pressed.SHIFT ? SONG.player2 : SONG.player1));
 		#end
 	}
 
@@ -1236,7 +1240,7 @@ class PlayState extends MusicBeatState
 			gf.dance();
 		}
 
-		if (!boyfriend.animation.curAnim.name.startsWith("sing") && boyfriend.heyTimer <= 0 && boyfriend.singTimer <= 0 && curBeat % boyfriend.danceBeats == 0)
+		if (!boyfriend.getCurAnimName().startsWith("sing") && boyfriend.heyTimer <= 0 && boyfriend.singTimer <= 0 && curBeat % boyfriend.danceBeats == 0)
 			boyfriend.playAnim('idle');
 
 		if (isHalloween && FlxG.random.bool(10) && curBeat > lightningStrikeBeat + lightningOffset)

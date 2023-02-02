@@ -114,10 +114,12 @@ class FreeplayState extends MusicBeatState
 
 		if (upP)
 		{
+			FlxG.sound.play('assets/sounds/scrollMenu' + TitleState.soundExt);
 			changeSelection(-1);
 		}
 		if (downP)
 		{
+			FlxG.sound.play('assets/sounds/scrollMenu' + TitleState.soundExt);
 			changeSelection(1);
 		}
 

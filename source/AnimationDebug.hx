@@ -1,5 +1,6 @@
 package;
 
+import flixel.math.FlxMath;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -24,6 +25,7 @@ class AnimationDebug extends FlxState
 	var isDad:Bool = true;
 	var daAnim:String = 'spooky';
 	var camFollow:FlxObject;
+	var bg:FlxSprite;
 
 	public function new(daAnim:String = 'spooky')
 	{
@@ -33,11 +35,13 @@ class AnimationDebug extends FlxState
 
 	override function create()
 	{
-		FlxG.sound.music.stop();
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
 
-		var gridBG:FlxSprite = FlxGridOverlay.create(10, 10);
-		gridBG.scrollFactor.set(0.5, 0.5);
-		add(gridBG);
+		bg = new FlxSprite().loadGraphic('assets/images/menuBGMagenta.png');
+		bg.scrollFactor.set();
+		bg.screenCenter();
+		add(bg);
 
 		if (daAnim == 'bf')
 			isDad = false;
@@ -82,6 +86,11 @@ class AnimationDebug extends FlxState
 
 	function genBoyOffsets(pushList:Bool = true):Void
 	{
+		dumbTexts.forEach(function(text:FlxText)
+		{
+			text.kill();
+			dumbTexts.remove(text, true);
+		});
 		var daLoop:Int = 0;
 
 		for (anim => offsets in char.animOffsets)
@@ -98,30 +107,38 @@ class AnimationDebug extends FlxState
 		}
 	}
 
-	function updateTexts():Void
-	{
-		dumbTexts.forEach(function(text:FlxText)
-		{
-			text.kill();
-			dumbTexts.remove(text, true);
-		});
-	}
-
 	override function update(elapsed:Float)
 	{
-		textAnim.text = char.animation.curAnim.name;
+		textAnim.text = char.getCurAnimName();
 
 		if (FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE]))
 		{
 			FlxG.switchState(new PlayState());
 		}
 
-		if (FlxG.keys.justPressed.E)
+		if (FlxG.keys.justPressed.E && FlxG.camera.zoom < 1.75) {
 			FlxG.camera.zoom += 0.25;
-		if (FlxG.keys.justPressed.Q)
+			var scale = 1 / FlxG.camera.zoom;
+			bg.scale.set(scale, scale);
+			bg.updateHitbox();
+			bg.screenCenter();
+		}
+		if (FlxG.keys.justPressed.Q && FlxG.camera.zoom > 0.25) {
 			FlxG.camera.zoom -= 0.25;
+			var scale = 1 / FlxG.camera.zoom;
+			bg.scale.set(scale, scale);
+			bg.updateHitbox();
+			bg.screenCenter();
+		}
+		if (FlxG.keys.justPressed.R) {
+			FlxG.camera.zoom = 1;
+			bg.scale.set(1, 1);
+			bg.updateHitbox();
+			bg.screenCenter();
+		}
 
-		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
+
+		if (FlxG.keys.anyPressed([I, J, K, L]))
 		{
 			if (FlxG.keys.pressed.I)
 				camFollow.velocity.y = -90;
@@ -142,28 +159,28 @@ class AnimationDebug extends FlxState
 			camFollow.velocity.set();
 		}
 
-		if (FlxG.keys.justPressed.W)
-		{
-			curAnim -= 1;
-		}
-
-		if (FlxG.keys.justPressed.S)
-		{
-			curAnim += 1;
-		}
-
-		if (curAnim < 0)
-			curAnim = animList.length - 1;
-
-		if (curAnim >= animList.length)
-			curAnim = 0;
-
-		if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE)
-		{
-			char.playAnim(animList[curAnim]);
-
-			updateTexts();
+		function updateAnim() {
+			char.playAnim(animList[curAnim], true);
 			genBoyOffsets(false);
+		}
+
+		if (FlxG.keys.anyJustPressed([S, W, SPACE]))
+		{
+			if (FlxG.keys.justPressed.S)
+				curAnim += 1;
+			else if (FlxG.keys.justPressed.W)
+				curAnim -= 1;
+			updateAnim();
+		}
+
+		if (curAnim < 0) {
+			curAnim = animList.length - 1;
+			updateAnim();
+		}
+
+		if (curAnim > animList.length-1) {
+			curAnim = 0;
+			updateAnim();
 		}
 
 		var upP = FlxG.keys.anyJustPressed([UP]);
@@ -178,17 +195,15 @@ class AnimationDebug extends FlxState
 
 		if (upP || rightP || downP || leftP)
 		{
-			updateTexts();
 			if (upP)
-				char.animOffsets.get(animList[curAnim])[1] += 1 * multiplier;
+				char.animOffsets.set(animList[curAnim], [char.animOffsets.get(animList[curAnim])[0], char.animOffsets.get(animList[curAnim])[1] += 1 * multiplier]);
 			if (downP)
-				char.animOffsets.get(animList[curAnim])[1] -= 1 * multiplier;
+				char.animOffsets.set(animList[curAnim], [char.animOffsets.get(animList[curAnim])[0], char.animOffsets.get(animList[curAnim])[1] -= 1 * multiplier]);
 			if (leftP)
-				char.animOffsets.get(animList[curAnim])[0] += 1 * multiplier;
+				char.animOffsets.set(animList[curAnim], [char.animOffsets.get(animList[curAnim])[0] += 1 * multiplier, char.animOffsets.get(animList[curAnim])[1]]);
 			if (rightP)
-				char.animOffsets.get(animList[curAnim])[0] -= 1 * multiplier;
+				char.animOffsets.set(animList[curAnim], [char.animOffsets.get(animList[curAnim])[0] -= 1 * multiplier, char.animOffsets.get(animList[curAnim])[1]]);
 
-			updateTexts();
 			genBoyOffsets(false);
 			char.playAnim(animList[curAnim]);
 		}
